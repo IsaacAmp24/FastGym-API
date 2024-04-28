@@ -10,11 +10,13 @@ import org.fastgym.fastgymapi.feeding.interfaces.rest.resources.CreateFeedingRes
 import org.fastgym.fastgymapi.feeding.interfaces.rest.resources.FeedingResource;
 import org.fastgym.fastgymapi.feeding.interfaces.rest.transform.CreateFeedingCommandFromResourceAssembler;
 import org.fastgym.fastgymapi.feeding.interfaces.rest.transform.FeedingResourceFromEntityAssembler;
+import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+@CrossOrigin(origins = "*")
 @RestController
-@RequestMapping("api/v1/feedings")
+@RequestMapping(value = "api/v1/feedings", produces = MediaType.APPLICATION_JSON_VALUE)
 @Tag(name = "Feedings", description = "Feedings Management Endpoints")
 public class FeedingController {
 
@@ -27,7 +29,7 @@ public class FeedingController {
     }
 
     // obtener alimentos por nombre
-    @GetMapping("/{feedingName}")
+    @GetMapping("/name/{feedingName}")
     public ResponseEntity<FeedingResource> getFeedingByName(@PathVariable String feedingName) {
         var getFeedingByNameQuery = new GetFeedingByNameQuery(new FeedingName(feedingName));
         var feeding = feedingQueryService.handle(getFeedingByNameQuery);
