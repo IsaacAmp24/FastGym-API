@@ -16,7 +16,7 @@ public class Feeding extends AbstractAggregateRoot<Feeding> {
     private Long id;
 
     @Embedded
-    private FeedingName feedingName;
+    private FeedingName feedingName; // desayuno | almuerzo | cena
 
     @Embedded
     private FeedingDescription feedingDescription;
