@@ -25,11 +25,6 @@ public class AdviceCommandServiceImpl implements AdviceCommandService {
             throw new IllegalArgumentException("Advice with description " + command.adviceDescription() + " already exists");
         });
 
-        // validate if advice have equal name
-        var adviceName = new AdviceName(command.adviceName());
-        adviceRepository.findAdviceByAdviceName(adviceName).map(advice -> {
-            throw new IllegalArgumentException("Advice with name " + command.adviceName() + " already exists");
-        });
 
         // create advice
         var advice = new Advice(command.adviceName(), command.adviceDescription());

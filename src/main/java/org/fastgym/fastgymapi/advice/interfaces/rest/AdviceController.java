@@ -30,10 +30,20 @@ public class AdviceController {
     }
 
     // obtengo los consejos por nombre
-    @GetMapping("/{adviceName}")
+    @GetMapping("/name/{adviceName}")
     public ResponseEntity<AdviceResource> getAdviceByName(String adviceName){
         var getAdviceByNameQuery = new GetAdviceByNameQuery(new AdviceName(adviceName));
         var advice = adviceQueryService.handle(getAdviceByNameQuery);
+        if (advice.isEmpty()) return ResponseEntity.badRequest().build();
+        var adviceResource = AdviceResourceFromEntityAssembler.toResourceFromEntity(advice.get());
+        return ResponseEntity.ok(adviceResource);
+    }
+
+    // get advice by id
+    @GetMapping("/{adviceId}")
+    public ResponseEntity<AdviceResource> getAdviceById(@PathVariable Long adviceId) {
+        var getAdviceByIdQuery = new GetAdviceByIdQuery(adviceId);
+        var advice = adviceQueryService.handle(getAdviceByIdQuery);
         if (advice.isEmpty()) return ResponseEntity.badRequest().build();
         var adviceResource = AdviceResourceFromEntityAssembler.toResourceFromEntity(advice.get());
         return ResponseEntity.ok(adviceResource);
