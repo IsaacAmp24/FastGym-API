@@ -2,6 +2,7 @@ package org.fastgym.fastgymapi.profiles.domain.model.aggregates;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserEmail;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserName;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserPlanType;
@@ -20,12 +21,15 @@ public class GymUser extends AbstractAggregateRoot<GymUser> {
     private Long id;
 
     @Embedded
+    @Setter
     private GymUserName gymUserName;
 
     @Embedded
+    @Setter
     private GymUserEmail email;
 
     @Embedded
+    @Setter
     private GymUserPlanType planType;
 
     @CreatedDate
@@ -54,6 +58,19 @@ public class GymUser extends AbstractAggregateRoot<GymUser> {
 
     public String getPlanType(){
         return this.planType.gymUserPlanType();
+    }
+
+    // setters
+    public void setName(String name) {
+        this.gymUserName = new GymUserName(name);
+    }
+
+    public void setEmail(String email) {
+        this.email = new GymUserEmail(email);
+    }
+
+    public void setPlanType(String planType) {
+        this.planType = new GymUserPlanType(planType);
     }
 
 

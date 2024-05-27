@@ -1,6 +1,7 @@
 package org.fastgym.fastgymapi.profiles.interfaces.rest;
 
 import io.swagger.v3.oas.annotations.tags.Tag;
+import org.fastgym.fastgymapi.profiles.domain.model.commands.UpdateGymUserCommand;
 import org.fastgym.fastgymapi.profiles.domain.model.queries.GetGymUserByIdQuery;
 import org.fastgym.fastgymapi.profiles.domain.model.queries.GetGymUserByNameQuery;
 import org.fastgym.fastgymapi.profiles.domain.model.queries.GetGymUserByPlanTypeQuery;
@@ -8,10 +9,12 @@ import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserName;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserPlanType;
 import org.fastgym.fastgymapi.profiles.domain.services.GymUserCommandService;
 import org.fastgym.fastgymapi.profiles.domain.services.GymUserQueryService;
+import org.fastgym.fastgymapi.profiles.infrastructure.persistence.jpa.repositories.GymUserRepository;
 import org.fastgym.fastgymapi.profiles.interfaces.rest.resources.CreateGymUserResource;
 import org.fastgym.fastgymapi.profiles.interfaces.rest.resources.GymUserResource;
 import org.fastgym.fastgymapi.profiles.interfaces.rest.transform.CreateGymUserCommandFromResourceAssembler;
 import org.fastgym.fastgymapi.profiles.interfaces.rest.transform.GymUserResourceFromEntityAssembler;
+import org.fastgym.fastgymapi.profiles.interfaces.rest.transform.UpdateGymUserCommandFromResourceAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -20,14 +23,16 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/api/v1/gym-users", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Gym Users", description = "Gym Users Management Endpoints")
+@Tag(name = "UsersGym", description = "Gym Users Management Endpoints")
 public class GymUserController {
     private final GymUserQueryService gymUserQueryService;
     private final GymUserCommandService gymUserCommandService;
+    private final GymUserRepository gymUserRepository;
 
-    public GymUserController(GymUserQueryService gymUserQueryService, GymUserCommandService gymUserCommandService) {
+    public GymUserController(GymUserQueryService gymUserQueryService, GymUserCommandService gymUserCommandService, GymUserRepository gymUserRepository) {
         this.gymUserQueryService = gymUserQueryService;
         this.gymUserCommandService = gymUserCommandService;
+        this.gymUserRepository = gymUserRepository;
     }
 
     // crear usuario de gimnasio
@@ -88,20 +93,38 @@ public class GymUserController {
 
     // actualizar usuario de gimnasio por id
     @PutMapping("/{gymUserId}")
-    public ResponseEntity<GymUserResource> updateGymUser(@PathVariable Long gymUserId, @RequestBody CreateGymUserResource resource) {
-        var createGymUserCommand = CreateGymUserCommandFromResourceAssembler.toCommandFromResource(resource);
-        var resultUserId = gymUserCommandService.handle(createGymUserCommand);
-        if (resultUserId == 0L) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<GymUserResource> updateGymUser(
+            @PathVariable Long gymUserId,
+            @RequestBody CreateGymUserResource resource) {
+
+        // 1. obtener el gymUser existente
         var getGymUserByIdQuery = new GetGymUserByIdQuery(gymUserId);
-        var gymUser = gymUserQueryService.handle(getGymUserByIdQuery);
-        if (gymUser.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+        var existingGymUser = gymUserQueryService.handle(getGymUserByIdQuery);
+
+        // 2. verificar si el gymUser existe
+        if (existingGymUser.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        var gymUserResource = GymUserResourceFromEntityAssembler.toResourceFromEntity(gymUser.get());
-        return new ResponseEntity<>(gymUserResource, HttpStatus.CREATED);
+
+        // 3. comando para actualizar el gymUser
+        var updateGymUserCommand = UpdateGymUserCommandFromResourceAssembler.toCommandFromResource(resource, gymUserId);
+
+        // 4. actualizar el gymUser existente
+        gymUserCommandService.handle(updateGymUserCommand);
+
+        // 5. recuperar el gymUser actualizado
+        var updateGymUser = gymUserRepository.findById(gymUserId);
+        if (updateGymUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        var gymUserResource = GymUserResourceFromEntityAssembler.toResourceFromEntity(updateGymUser.get());
+        return ResponseEntity.ok(gymUserResource);
+
+
     }
+
+
 
 
 

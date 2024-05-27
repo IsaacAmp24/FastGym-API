@@ -7,7 +7,6 @@ import org.fastgym.fastgymapi.advice.domain.services.AdviceQueryService;
 import org.fastgym.fastgymapi.advice.infrastructure.jpa.repositories.AdviceRepository;
 import org.springframework.stereotype.Service;
 
-import java.util.List;
 import java.util.Optional;
 
 @Service

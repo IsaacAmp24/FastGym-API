@@ -10,7 +10,6 @@ import org.fastgym.fastgymapi.advice.interfaces.rest.resources.AdviceResource;
 import org.fastgym.fastgymapi.advice.interfaces.rest.resources.CreateAdviceResource;
 import org.fastgym.fastgymapi.advice.interfaces.rest.transform.AdviceResourceFromEntityAssembler;
 import org.fastgym.fastgymapi.advice.interfaces.rest.transform.CreateAdviceCommandFromResourceAssembler;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;

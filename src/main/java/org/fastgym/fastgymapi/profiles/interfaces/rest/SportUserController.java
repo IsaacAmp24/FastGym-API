@@ -10,6 +10,7 @@ import org.fastgym.fastgymapi.profiles.interfaces.rest.resources.CreateSportUser
 import org.fastgym.fastgymapi.profiles.interfaces.rest.resources.SportUserResource;
 import org.fastgym.fastgymapi.profiles.interfaces.rest.transform.CreateSportUserCommandFromResourceAssembler;
 import org.fastgym.fastgymapi.profiles.interfaces.rest.transform.SportUserResourceFromEntityAssembler;
+import org.fastgym.fastgymapi.profiles.interfaces.rest.transform.UpdateSportUserResourceCommandFromResourceAssembler;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.MediaType;
 import org.springframework.http.ResponseEntity;
@@ -18,7 +19,7 @@ import org.springframework.web.bind.annotation.*;
 @CrossOrigin(origins = "*")
 @RestController
 @RequestMapping(value = "/api/v1/sport-users", produces = MediaType.APPLICATION_JSON_VALUE)
-@Tag(name = "Sport Users", description = "Sport Users Management Endpoints")
+@Tag(name = "UsersSport", description = "Sport Users Management Endpoints")
 public class SportUserController {
     private final SportUserQueryService sportUserQueryService;
     private final SportUserCommandService sportUserCommandService;
@@ -67,18 +68,29 @@ public class SportUserController {
     }
 
     @PutMapping("/{id}")
-    public ResponseEntity<SportUserResource> updateSportUser(@PathVariable Long id, @RequestBody CreateSportUserResource resource) {
-        var createSportUserCommand = CreateSportUserCommandFromResourceAssembler.toCommandFromResource(resource);
-        var resultUserId = sportUserCommandService.handle(createSportUserCommand);
-        if (resultUserId == 0L) {
-            return ResponseEntity.badRequest().build();
-        }
+    public ResponseEntity<SportUserResource> updateSportUser(
+            @PathVariable Long id,
+            @RequestBody CreateSportUserResource resource) {
+
+        // 1. obtener el sportUser existente
         var getSportUserByIdQuery = new GetSportUserByIdQuery(id);
-        var sportUser = sportUserQueryService.handle(getSportUserByIdQuery);
-        if (sportUser.isEmpty()) {
-            return ResponseEntity.badRequest().build();
+        var existingSportUser = sportUserQueryService.handle(getSportUserByIdQuery);
+
+        // 2. verificar si el sportUser existe
+        if (existingSportUser.isEmpty()) {
+            return ResponseEntity.notFound().build();
         }
-        var sportUserResource = SportUserResourceFromEntityAssembler.toResourceFromEntity(sportUser.get());
-        return new ResponseEntity<>(sportUserResource, HttpStatus.CREATED);
+
+        // 3. comando para actualizar el sportUser
+        var updateSportUserCommand = UpdateSportUserResourceCommandFromResourceAssembler.toCommandFromResource(resource, id);
+
+        // 4. actualizar el sportUser existente
+        var updatedSportUserId = sportUserCommandService.handle(updateSportUserCommand);
+
+        // 5. recuperar el sportUser actualizado (opcional)
+        var updateSportUser = existingSportUser.get();
+        var sportUserResource = SportUserResourceFromEntityAssembler.toResourceFromEntity(updateSportUser);
+
+        return new ResponseEntity<>(sportUserResource, HttpStatus.OK);
     }
 }

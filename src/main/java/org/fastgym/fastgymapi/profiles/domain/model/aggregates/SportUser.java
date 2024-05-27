@@ -3,6 +3,7 @@ package org.fastgym.fastgymapi.profiles.domain.model.aggregates;
 
 import jakarta.persistence.*;
 import lombok.Getter;
+import lombok.Setter;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.Email;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.SportName;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.SportUserName;
@@ -20,12 +21,15 @@ public class SportUser extends AbstractAggregateRoot<SportUser> {
     private Long id;
 
     @Embedded
+    @Setter
     private SportUserName name;
 
     @Embedded
+    @Setter
     private Email email;
 
     @Embedded
+    @Setter
     private SportName sportName;
 
     @CreatedDate
@@ -57,6 +61,19 @@ public class SportUser extends AbstractAggregateRoot<SportUser> {
 
     public String getSportName(){
         return this.sportName.sportName();
+    }
+
+    // setters
+    public void setName(String name) {
+        this.name = new SportUserName(name);
+    }
+
+    public void setEmail(String email) {
+        this.email = new Email(email);
+    }
+
+    public void setSportName(String sportName) {
+        this.sportName = new SportName(sportName);
     }
 
 

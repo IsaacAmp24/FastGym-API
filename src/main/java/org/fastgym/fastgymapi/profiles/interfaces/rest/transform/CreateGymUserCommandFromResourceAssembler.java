@@ -5,6 +5,9 @@ import org.fastgym.fastgymapi.profiles.interfaces.rest.resources.CreateGymUserRe
 
 public class CreateGymUserCommandFromResourceAssembler {
     public static CreateGymUserCommand toCommandFromResource(CreateGymUserResource resource) {
-        return new CreateGymUserCommand(resource.name(), resource.email(), resource.planType());
+        return new CreateGymUserCommand(
+                resource.name(),
+                resource.email(),
+                resource.planType());
     }
 }

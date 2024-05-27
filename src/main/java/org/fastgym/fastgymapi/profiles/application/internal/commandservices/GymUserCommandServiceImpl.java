@@ -2,7 +2,9 @@ package org.fastgym.fastgymapi.profiles.application.internal.commandservices;
 
 import org.fastgym.fastgymapi.profiles.domain.model.aggregates.GymUser;
 import org.fastgym.fastgymapi.profiles.domain.model.commands.CreateGymUserCommand;
+import org.fastgym.fastgymapi.profiles.domain.model.commands.UpdateGymUserCommand;
 import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserEmail;
+import org.fastgym.fastgymapi.profiles.domain.model.valueobjects.GymUserName;
 import org.fastgym.fastgymapi.profiles.domain.services.GymUserCommandService;
 import org.fastgym.fastgymapi.profiles.infrastructure.persistence.jpa.repositories.GymUserRepository;
 import org.springframework.stereotype.Service;
@@ -34,6 +36,30 @@ public class GymUserCommandServiceImpl implements GymUserCommandService {
 
         // crea un nuevo GymUser y lo guarda
         var gymUser = new GymUser(command.name(), command.email(), command.planType());
+        gymUserRepository.save(gymUser);
+        return gymUser.getId();
+    }
+
+    @Override
+    public Long handle(UpdateGymUserCommand command) {
+        var gymUser = gymUserRepository.findById(command.id()).orElseThrow(()-> new IllegalArgumentException("gymUser with id" + command.id()+ "does no exist"));
+
+        // si el nombre es diferente de null, de "string" y no esta vacio, actualiza el nombre
+        if (command.name() != null && !command.name().equals("string") && !command.name().isEmpty()) {
+            gymUser.setName(command.name());
+        }
+
+
+        // si el email es diferente de null, de "string" y no esta vacio, actualiza el email
+        if (command.email() != null && !command.email().equals("string") && !command.email().isEmpty()) {
+            gymUser.setEmail(command.email());
+        }
+
+        // si el planType es diferente de null, de "string" y no esta vacio, actualiza el planType
+        if (command.planType() != null && !command.planType().equals("string") && !command.planType().isEmpty()) {
+            gymUser.setPlanType(command.planType());
+        }
+
         gymUserRepository.save(gymUser);
         return gymUser.getId();
     }
